@@ -1,4 +1,4 @@
 # Proyecto-1-TC
 ## Integrantes
-Diego Leiva
-Pablo Orellana
+- Diego Leiva
+- Pablo Orellana
