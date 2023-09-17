@@ -97,3 +97,16 @@ def convert_to_afd(afn):
                 current_afd_state.add_transition(symbol, existing_state)
 
     return afd
+
+def simulate_afd(afd, input_string):
+        current_state = afd.start_state
+
+        for symbol in input_string:
+            if symbol in current_state.transitions:
+                next_state = current_state.transitions[symbol]
+                current_state = next_state
+            else:
+                # Transición no definida, la cadena no es aceptada
+                return False
+
+        return current_state.is_final
