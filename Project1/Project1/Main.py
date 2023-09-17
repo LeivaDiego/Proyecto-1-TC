@@ -45,6 +45,7 @@ for index, infix in enumerate(lines):
 
     is_accepted_afn = simulate_afn(afn, w)
     is_accepted_afd = simulate_afd(afd, w)
+    is_accepted_min = simulate_afd(afd_min, w)
 
     if is_accepted_afn:
         print(f"La cadena '{w}' es aceptada por el AFN\n")
@@ -55,5 +56,11 @@ for index, infix in enumerate(lines):
         print(f"La cadena '{w}' es aceptada por el AFD\n")
     else:
         print(f"La cadena '{w}' no es aceptada por el AFD\n")
+
+
+    if is_accepted_min:
+        print(f"La cadena '{w}' es aceptada por el AFD minimizado\n")
+    else:
+        print(f"La cadena '{w}' no es aceptada por el AFD minimizado\n")
 
     pause = input("Presione enter para continuar")

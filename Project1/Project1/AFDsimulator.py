@@ -116,9 +116,7 @@ def simulate_afd(afd, input_string):
 def minimize_afd(afd):
     partitions = [set(filter(lambda s: s.is_final, afd.states)),
                   set(filter(lambda s: not s.is_final, afd.states))]
-    
-    state_number = 1
-    
+
     changed = True
     while changed:
         changed = False
@@ -128,7 +126,12 @@ def minimize_afd(afd):
             groups = {}
             
             for state in partition:
-                key = tuple(sorted((symbol, next_state.state_number) for symbol, next_state in state.transitions.items()))
+                key_elements = []
+                for symbol, next_state in state.transitions.items():
+                    partition_index = next((i for i, p in enumerate(partitions) if next_state in p), -1)
+                    key_elements.append((symbol, partition_index))
+                key = tuple(sorted(key_elements))
+
                 
                 if key not in groups:
                     groups[key] = set()
@@ -141,15 +144,13 @@ def minimize_afd(afd):
             new_partitions.extend(groups.values())
             
         partitions = new_partitions
-    
+
     minimized_afd = AFD()
     state_mapping = {}
     
     for partition in partitions:
         new_state = AFDState(set())
         new_state.is_final = any(state.is_final for state in partition)
-        new_state.state_number = state_number
-        state_number += 1
         minimized_afd.add_state(new_state)
         
         for old_state in partition:
@@ -160,5 +161,11 @@ def minimize_afd(afd):
             new_state.add_transition(symbol, state_mapping[next_old_state])
     
     minimized_afd.start_state = state_mapping[afd.start_state]
-    
+
+    counter = 1
+    for state in minimized_afd.states:
+        state.state_number = counter
+        counter += 1
+
     return minimized_afd
+
