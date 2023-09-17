@@ -2,7 +2,7 @@ import io
 from shuntingYard import ShuntingYard
 from syntaxTree import SyntaxTree
 from AFNsimulator import thompson_from_tree, State, simulate_afn
-from AFDsimulator import convert_to_afd, simulate_afd
+from AFDsimulator import convert_to_afd, simulate_afd, minimize_afd
 
 converter = ShuntingYard()
 tree_maker = SyntaxTree()
@@ -30,11 +30,15 @@ for index, infix in enumerate(lines):
     afn_dot = afn.visualize_afn()
     afn_dot.render(f'afn_{index+1}', view = True, cleanup=True)
     
-
+    # Construccion y visualizacion del AFD
     afd = convert_to_afd(afn)
     afd_dot = afd.visualize_afd()
     afd_dot.render(f'afd_{index+1}', view = True, cleanup = True)
 
+    # Minimizacion
+    afd_min = minimize_afd(afd)
+    min_dot = afd_min.visualize_afd()
+    min_dot.render(f'min_afd_{index+1}', view=True, cleanup=True)
 
     # Evaluacion de la cadena 
     w = input(f"Ingrese una cadena para probrar el AFN:")

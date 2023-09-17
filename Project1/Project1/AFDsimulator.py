@@ -61,16 +61,15 @@ def convert_to_afd(afn):
     afd = AFD()
     initial_afn_states = epsilon_closure(set([afn.start_state]))
     initial_afd_state = AFDState(initial_afn_states)
+    initial_afd_state.state_number = 1
     afd.start_state = initial_afd_state
     afd.add_state(initial_afd_state)
 
     unprocessed_states = [initial_afd_state]
-    counter = 1
+    counter = 2  
 
     while unprocessed_states:
         current_afd_state = unprocessed_states.pop()
-        current_afd_state.state_number = counter
-        counter += 1
 
         symbols = set()
         for afn_state in current_afd_state.afn_states:
@@ -90,6 +89,8 @@ def convert_to_afd(afn):
 
             if existing_state is None:
                 new_afd_state = AFDState(new_afn_states)
+                new_afd_state.state_number = counter 
+                counter += 1
                 afd.add_state(new_afd_state)
                 unprocessed_states.append(new_afd_state)
                 current_afd_state.add_transition(symbol, new_afd_state)
@@ -106,7 +107,58 @@ def simulate_afd(afd, input_string):
                 next_state = current_state.transitions[symbol]
                 current_state = next_state
             else:
-                # Transición no definida, la cadena no es aceptada
+                # Transicion no definida, la cadena no es aceptada
                 return False
 
         return current_state.is_final
+
+
+def minimize_afd(afd):
+    partitions = [set(filter(lambda s: s.is_final, afd.states)),
+                  set(filter(lambda s: not s.is_final, afd.states))]
+    
+    state_number = 1
+    
+    changed = True
+    while changed:
+        changed = False
+        new_partitions = []
+        
+        for partition in partitions:
+            groups = {}
+            
+            for state in partition:
+                key = tuple(sorted((symbol, next_state.state_number) for symbol, next_state in state.transitions.items()))
+                
+                if key not in groups:
+                    groups[key] = set()
+                
+                groups[key].add(state)
+                
+            if len(groups) > 1:
+                changed = True
+            
+            new_partitions.extend(groups.values())
+            
+        partitions = new_partitions
+    
+    minimized_afd = AFD()
+    state_mapping = {}
+    
+    for partition in partitions:
+        new_state = AFDState(set())
+        new_state.is_final = any(state.is_final for state in partition)
+        new_state.state_number = state_number
+        state_number += 1
+        minimized_afd.add_state(new_state)
+        
+        for old_state in partition:
+            state_mapping[old_state] = new_state
+    
+    for old_state, new_state in state_mapping.items():
+        for symbol, next_old_state in old_state.transitions.items():
+            new_state.add_transition(symbol, state_mapping[next_old_state])
+    
+    minimized_afd.start_state = state_mapping[afd.start_state]
+    
+    return minimized_afd
