@@ -1,13 +1,14 @@
+# Define la clase Shunting Yard para la conversion de una expresion regular infix a postfix
 class ShuntingYard:
     
+    # Inicializa la lista de operadores validos
     def __init__(self):
-        # Define los operadores
         self.allOperators = ['|', '?', '+', '*', '^']
-        self.binaryOperators = ['^', '|']
 
 
+    # Retorna la precedencia del operador dado, 0 si no se encuentra
     def getPrecedence(self, c):
-        # Retorna la precedencia del operador dado, 0 si no se encuentra
+        
         precedence = {
             '(': 1,
             '|': 2,
@@ -19,14 +20,18 @@ class ShuntingYard:
         return precedence.get(c, 0)
 
 
+    # Convierte el operador '+' a su forma explicita, es decir, 'a+' pasa a ser 'aa*'
     def plus_operator_convertion(self, regex):
-        # Convierte el operador '+' a su forma explicita, es decir, 'a+' a 'aa*'
+
         i = 0
         transformed_exp = ""
 
+        # Bucle que recorre la expresion regular
         while i < len(regex):
 
+            # Si encuentra un '+' verifica el caracter anterior
             if regex[i] == '+':
+                # si es un parentesis, busca el parentesis correspondiente y reemplaza por '*'
                 if regex[i-1] == ')':
                     for j in range(i-1, -1, -1):
                         if regex[j] == '(':
@@ -40,15 +45,18 @@ class ShuntingYard:
         return transformed_exp
 
 
-
+    # Convierte la extension de expresion '?' a su forma explicita, es decir, 'a?' a 'a|ε'
     def interrogation_operator_convertion(self, regex):
-        # Convierte la extension de expresion ? a su forma explicita, es decir, 'a?' a 'a|ε'
+        
         stack = []
         openParentesis = []
         i = 0
 
+        # Bucle que recorre la expresion regular
         while i < len(regex):
+            # Si encuentra '?', verifica el caracter anterior
             if regex[i] == '?':
+                # si es un parentesis, busca el parentesis correspondiente 
                 if regex[i-1] == ')':
                     for j in range(i-1, -1, -1):
                         if regex[j] == ')':
@@ -71,7 +79,7 @@ class ShuntingYard:
                 transformed_exp += '(' * count + regex[i]
 
             elif regex[i] == '?':
-                transformed_exp += '|ε)'
+                transformed_exp += '|ε)' #  reemplaza por '|ε'
 
             else:
                 transformed_exp += regex[i]
@@ -81,14 +89,16 @@ class ShuntingYard:
         return transformed_exp
 
 
-
+    # Maneja la concatenacion implicita, transformandola en explicita usando ^
     def concatenation_convertion(self, expression):
-        # Maneja la concatenacion implicita, transformandola en explicita usando ^
+       
         new_expression = []
 
+        # Bucle que recorre la expresion
         for i in range(len(expression) - 1):
             new_expression.append(expression[i])
 
+            # si encuentra caracteres consecutivos que no sean operadores, agrega '^' entre caracteres
             if (expression[i] not in ['|', '(', '^'] and 
                 expression[i+1] not in ['|', ')', '*', '+', '?']
                 ):
@@ -99,9 +109,9 @@ class ShuntingYard:
         return ''.join(new_expression)
 
 
-
+    # Hace uso de las conversiones para transformar la expresion a su forma explicita antes de hacer shunting yard
     def formatRegEx(self, regex):
-        # Hace uso de las conversiones para transformar la expresion a su forma explicita antes de hacer shunting yard
+        
         regex = self.plus_operator_convertion(regex)
         regex = self.interrogation_operator_convertion(regex)
         regex = self.concatenation_convertion(regex)
@@ -109,9 +119,9 @@ class ShuntingYard:
         return regex
 
 
-
+    # Convierte la expresion infix a formato postfix utilizando el algoritmo de Shunting Yard
     def infixToPostfix(self, regex):
-        # Convierte la expresion infix a formato postfix
+        
         postfix = []
         stack = []
         formattedRegEx = self.formatRegEx(regex)
