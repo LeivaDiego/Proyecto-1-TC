@@ -133,6 +133,8 @@ def thompson_from_tree(node):
     # Para el operador Kleene '*' construye un AFN interno de forma recursiva
     if node.value == '*':
         internal_nfa = thompson_from_tree(node.children[0])
+        # Asegurarse de que el estado final del AFN interno no este marcado como final
+        internal_nfa.end_state.is_final = False
         # Crea los estados iniciales y finales de este AFN interno
         start = State()
         end = State()
@@ -148,6 +150,9 @@ def thompson_from_tree(node):
     if node.value == '|':
         left_nfa = thompson_from_tree(node.children[0])
         right_nfa = thompson_from_tree(node.children[1])
+        # Asegurarse de que los estados finales de ambos AFN no esten marcados como finales
+        left_nfa.end_state.is_final = False
+        right_nfa.end_state.is_final = False
         # Crea los estados iniciales y finales de estos AFN internos
         start = State()
         end = State()
@@ -163,6 +168,8 @@ def thompson_from_tree(node):
     if node.value == '^':
         left_nfa = thompson_from_tree(node.children[0])
         right_nfa = thompson_from_tree(node.children[1])
+        # Asegurarse de que el estado final del AFN de la izquierda no este marcado como final
+        left_nfa.end_state.is_final = False
         # Conectar el final de la izquierda al inicio de la derecha con transicion epsilon
         left_nfa.connect_to(right_nfa) 
         # Retornar el nuevo AFN
