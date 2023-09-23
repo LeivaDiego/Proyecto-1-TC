@@ -234,10 +234,10 @@ def minimize_afd(afd):
     minimized_afd.start_state = state_mapping[afd.start_state]
 
     # Asignar numeros de estado a los estados en el AFD minimizado
-    counter = 1
+    counter = len(minimized_afd.states)
     for state in minimized_afd.states:
         state.state_number = counter
-        counter += 1
+        counter -= 1
 
     # Retornar el AFD minimizado
     return minimized_afd
